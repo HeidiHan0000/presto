@@ -136,6 +136,8 @@ import com.facebook.presto.sql.planner.iterative.rule.ScaledWriterRule;
 import com.facebook.presto.sql.planner.iterative.rule.SimplifyCardinalityMap;
 import com.facebook.presto.sql.planner.iterative.rule.SimplifyCountOverConstant;
 import com.facebook.presto.sql.planner.iterative.rule.SimplifyRowExpressions;
+import com.facebook.presto.sql.planner.iterative.rule.NativeExecutionTypeRewriter;
+import com.facebook.presto.sql.planner.iterative.rule.NativeExecutionTypeProjectNodeRewriter;
 import com.facebook.presto.sql.planner.iterative.rule.SimplifySortWithConstantInput;
 import com.facebook.presto.sql.planner.iterative.rule.SimplifyTopNWithConstantInput;
 import com.facebook.presto.sql.planner.iterative.rule.SingleDistinctAggregationToGroupBy;
@@ -360,10 +362,22 @@ public class PlanOptimizers
                 estimatedExchangesCostCalculator,
                 new RewriteConstantArrayContainsToInExpression(metadata.getFunctionAndTypeManager()).rules());
 
+        IterativeOptimizer nativeExecutionTypeRewriter = new IterativeOptimizer(
+                metadata,
+                ruleStats,
+                statsCalculator,
+                estimatedExchangesCostCalculator,
+                ImmutableSet.<Rule<?>>builder()
+                        .addAll(new NativeExecutionTypeRewriter(metadata.getFunctionAndTypeManager()).rules())
+                        // .add(new NativeExecutionTypeProjectNodeRewriter())
+                        .build());
+                // new NativeExecutionTypeRewriter(metadata.getFunctionAndTypeManager()).rules());
+
         PlanOptimizer predicatePushDown = new StatsRecordingPlanOptimizer(optimizerStats, new PredicatePushDown(metadata, sqlParser, expressionOptimizerManager, featuresConfig.isNativeExecutionEnabled()));
         PlanOptimizer prefilterForLimitingAggregation = new StatsRecordingPlanOptimizer(optimizerStats, new PrefilterForLimitingAggregation(metadata, statsCalculator));
 
         builder.add(
+                nativeExecutionTypeRewriter,
                 new IterativeOptimizer(
                         metadata,
                         ruleStats,

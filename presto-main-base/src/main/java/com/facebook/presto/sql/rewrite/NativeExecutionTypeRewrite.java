@@ -89,10 +89,10 @@ final class NativeExecutionTypeRewrite
             WarningCollector warningCollector,
             String query)
     {
-        if (SystemSessionProperties.isNativeExecutionEnabled(session)
-                && SystemSessionProperties.isNativeExecutionTypeRewriteEnabled(session)) {
-            return (Statement) new Rewriter(metadata.getFunctionAndTypeManager().getFunctionAndTypeResolver()).process(node, null);
-        }
+//        if (SystemSessionProperties.isNativeExecutionEnabled(session)
+//                && SystemSessionProperties.isNativeExecutionTypeRewriteEnabled(session)) {
+//            return (Statement) new Rewriter(metadata.getFunctionAndTypeManager().getFunctionAndTypeResolver()).process(node, null);
+//        }
         return node;
     }
 
